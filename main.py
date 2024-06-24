@@ -1,7 +1,8 @@
 import os
 from flask import Flask, render_template, request, send_file, url_for
 from urllib.parse import unquote
-
+import datetime
+import json
 
 app = Flask(__name__)
 
@@ -11,8 +12,36 @@ def list_files(path):
 
 app.jinja_env.filters['list_files'] = list_files
 
+def load_streak():
+    """Load the streak value from a file"""
+    streak_file = 'streak.json'
+    if os.path.exists(streak_file):
+        with open(streak_file, 'r') as f:
+            streak_data = json.load(f)
+            last_opened = datetime.datetime.fromisoformat(streak_data['last_opened'])
+            today = datetime.datetime.today()
+            if today.date() == last_opened.date():
+                streak = streak_data['streak']
+            else:
+                streak = streak_data['streak'] + 1
+                streak_data['last_opened'] = today.isoformat()
+                with open(streak_file, 'w') as f:
+                    json.dump(streak_data, f)
+    else:
+        streak = 1
+        with open(streak_file, 'w') as f:
+            json.dump({'streak': 1, 'last_opened': datetime.datetime.today().isoformat()}, f)
+    return streak
+
+def save_streak(streak):
+    """Save the streak value to a file"""
+    streak_file = 'streak.json'
+    with open(streak_file, 'w') as f:
+        json.dump({'streak': streak, 'last_opened': datetime.datetime.today().isoformat()}, f)
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    streak = load_streak()
     if request.method == 'POST':
         branch = request.form.get('branch')
         year = request.form.get('year')
@@ -26,12 +55,12 @@ def index():
                 error_message += "Year, "
             if not sem:
                 error_message += "Sem"
-            return render_template('index.html', error_message=error_message)
+            return render_template('index.html', error_message=error_message, streak=streak)
         
         folder_path = os.path.join('files', year, branch, sem)
         files = list_files(folder_path)
-        return render_template('files.html', files=files, year=year, branch=branch, sem=sem, path=folder_path)
-    return render_template('index.html')
+        return render_template('files.html', files=files, year=year, branch=branch, sem=sem, path=folder_path, streak=streak)
+    return render_template('index.html', streak=streak)
 
 @app.route('/files/<year>/<branch>/<sem>')
 def files(year, branch, sem):
