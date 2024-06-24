@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vignan Hub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+       .folder {
+            font-weight: bold;
+            color: #00698f;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+        <h1>Vignan Hub</h1>
+        <div class="streak"></div>
+    </header>
+    <main>
+        <h2>Files:</h2>
+        <ol>
+        {% for file in files %}
+            {% if file.is_dir() %}
+                <li class="folder">{{ file.name }}
+                    <ol>
+                    {% set subfiles = file.path | list_files %}
+                    {% include 'files.html' %}
+                    </ol>
+                </li>
+            {% else %}
+                <li><a href="{{ url_for('download', filename=file.name, year=year, branch=branch, sem=sem) }}" target="_blank">{{ file.name }}</a></li>
+            {% endif %}
+        {% endfor %}
+        </ol>
+    </main>
+</body>
+</html>
