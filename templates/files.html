@@ -21,14 +21,9 @@
         <ol>
         {% for file in files %}
             {% if file.is_dir() %}
-                <li class="folder">{{ file.name }}
-                    <ol>
-                    {% set subfiles = file.path | list_files %}
-                    {% include 'files.html' %}
-                    </ol>
-                </li>
+                <li class="folder"><a href="{{ url_for('files', year=year, branch=branch, sem=sem, path=file.path) }}">{{ file.name }}</a></li>
             {% else %}
-                <li><a href="{{ url_for('download', filename=file.name, year=year, branch=branch, sem=sem) }}" target="_blank">{{ file.name }}</a></li>
+                <li><a href="{{ url_for('download_file', filename=file.name, year=year, branch=branch, sem=sem, path=file.path) }}" target="_blank">{{ file.name }}</a></li>
             {% endif %}
         {% endfor %}
         </ol>
