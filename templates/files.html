@@ -1,32 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Vignan Hub</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-       .folder {
-            font-weight: bold;
-            color: #00698f;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
-        <h1>Vignan Hub</h1>
-        <div class="streak"></div>
-    </header>
-    <main>
-        <h2>Files:</h2>
-        <ol>
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Files for {{ branch }} Year - {{ year }}  Sem - {{ sem }}</h2>
+    <ul>
         {% for file in files %}
-            {% if file.is_dir() %}
-                <li class="folder"><a href="{{ url_for('files', year=year, branch=branch, sem=sem, path=file.path) }}">{{ file.name }}</a></li>
-            {% else %}
-                <li><a href="{{ url_for('download_file', filename=file.name, year=year, branch=branch, sem=sem, path=file.path) }}" target="_blank">{{ file.name }}</a></li>
-            {% endif %}
+            <li>
+                {% if file.is_file() %}
+                    <a href="{{ url_for('download_file', year=year, branch=branch, sem=sem, path=file.path) }}">{{ file.name }}</a>
+                {% else %}
+                    <a href="{{ url_for('files', year=year, branch=branch, sem=sem, path=file.path) }}">{{ file.name }}</a>
+                {% endif %}
+            </li>
         {% endfor %}
-        </ol>
-    </main>
-</body>
-</html>
+    </ul>
+{% endblock %}
